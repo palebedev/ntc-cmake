@@ -1,0 +1,11 @@
+// Copyright Pavel A. Lebedev 2020
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+// SPDX-License-Identifier: BSL-1.0
+
+#ifndef UUID_EFE14632_31AB_4AAC_96F1_D47CB37F3FEE
+#define UUID_EFE14632_31AB_4AAC_96F1_D47CB37F3FEE
+
+#cmakedefine01 HAVE_MM_CLMULEPI64_SI128
+
+#endif
