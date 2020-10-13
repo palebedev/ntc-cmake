@@ -18,7 +18,7 @@ function(_ntc_alias_target_name OUTPUT)
     endif()
 endfunction()
 
-# Helper function to setup common library configuration.
+# Helper function to setup common target configuration.
 # Optional argument will be inserted between
 # include/${NAMESPACE}/ and config/export header names.
 
