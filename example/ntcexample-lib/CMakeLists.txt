@@ -31,7 +31,7 @@ check_cxx_source_compiles("#include <wmmintrin.h>
         _mm_clmulepi64_si128(a,b,0);
     }" HAVE_MM_CLMULEPI64_SI128)
 include(FeatureSummary)
-add_feature_info(PCLMUL ${HAVE_MM_CLMULEPI64_SI128}
+add_feature_info(PCLMUL HAVE_MM_CLMULEPI64_SI128
     "hardware support for carryless multiplication")
 
 find_package(Boost REQUIRED)
