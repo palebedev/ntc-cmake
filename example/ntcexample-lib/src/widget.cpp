@@ -26,7 +26,7 @@ namespace ntcexample
         for(std::uint64_t m1=w1.x(),m2=w2.x();m2;m1<<=1,m2>>=1)
             if(m2&1)
                 r ^= m1;
-        return r;
+        return widget{r};
 #endif
     }
 }
