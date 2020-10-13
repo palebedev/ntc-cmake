@@ -10,22 +10,18 @@ include_guard(GLOBAL)
 # Used to provide subpath customization and handle lib32/lib64, etc.
 include(GNUInstallDirs)
 
-function(_ntc_alias_target_name OUTPUT)
-    if(COMPONENT)
-        set(${OUTPUT} "${NAMESPACE}::${COMPONENT}" PARENT_SCOPE)
-    else()
-        set(${OUTPUT} "${NAMESPACE}::${NAMESPACE}" PARENT_SCOPE)
-    endif()
-endfunction()
-
 # Helper function to setup common target configuration.
 # Optional argument will be inserted between
 # include/${NAMESPACE}/ and config/export header names.
 
 function(ntc_target TARGET_NAME) # INCLUDE_INFIX_opt
-    get_target_property(project_type ${TARGET_NAME} TYPE)
+    if(COMPONENT)
+        set(alias_name "${NAMESPACE}::${COMPONENT}")
+    else()
+        set(alias_name "${NAMESPACE}::${NAMESPACE}")
+    endif()
 
-    _ntc_alias_target_name(alias_name)
+    get_target_property(project_type ${TARGET_NAME} TYPE)
 
     if(project_type STREQUAL OBJECT_LIBRARY)
         message(FATAL_ERROR "ntc_setup doesn't support object libraries")
@@ -119,8 +115,6 @@ function(ntc_target TARGET_NAME) # INCLUDE_INFIX_opt
             Qt5 "\"${NTC_QT_DEFINITIONS}\""
         )
     endif()
-
-    _ntc_alias_target_name(alias_name)
 
     # Look for configuration file in source directory.
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/config.hpp.in")
