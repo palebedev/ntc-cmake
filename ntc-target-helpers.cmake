@@ -10,11 +10,17 @@ include_guard(GLOBAL)
 # Used to provide subpath customization and handle lib32/lib64, etc.
 include(GNUInstallDirs)
 
-# Helper function to setup common target configuration.
-# Optional argument will be inserted between
-# include/${NAMESPACE}/ and config/export header names.
+# ntc_target(<target_name> [INCLUDE_INFIX <include_infix>])
+# Helper function to setup common target configuration for target <target_name>.
+# If <include_infix> is specified, it is inserted between
+# include/${NAMESPACE}/ and config/export header names. That is, to put
+# headers in subdirectory subdir, specify "subdir/" as include infix.
+function(ntc_target TARGET_NAME)
+    cmake_parse_arguments(PARSE_ARGV 1 args "" "INCLUDE_INFIX" "")
+    if(args_UNPARSED_ARGUMENTS OR args_KEYWORDS_MISSING_VALUES)
+        message(SEND_ERROR "Invalid arguments to ntc_target")
+    endif()
 
-function(ntc_target TARGET_NAME) # INCLUDE_INFIX_opt
     if(COMPONENT)
         set(alias_name "${NAMESPACE}::${COMPONENT}")
     else()
@@ -46,10 +52,12 @@ function(ntc_target TARGET_NAME) # INCLUDE_INFIX_opt
         if(NOT project_type STREQUAL INTERFACE_LIBRARY)
             # Support proper visibility/dllexport handling for shared library builds.
             include(GenerateExportHeader)
-            generate_export_header(${TARGET_NAME} EXPORT_FILE_NAME include/${NAMESPACE}/${ARGN}export.h)
-            target_sources(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include/${NAMESPACE}/${ARGN}export.h)
-            install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${NAMESPACE}/${ARGN}export.h
-                    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${NAMESPACE}/${ARGN}"
+            generate_export_header(${TARGET_NAME}
+                EXPORT_FILE_NAME include/${NAMESPACE}/${args_INCLUDE_INFIX}export.h)
+            target_sources(${TARGET_NAME} PRIVATE
+                ${CMAKE_CURRENT_BINARY_DIR}/include/${NAMESPACE}/${args_INCLUDE_INFIX}export.h)
+            install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${NAMESPACE}/${args_INCLUDE_INFIX}export.h
+                    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${NAMESPACE}/${args_INCLUDE_INFIX}"
                     COMPONENT ${alias_name}
             )
 
@@ -120,12 +128,12 @@ function(ntc_target TARGET_NAME) # INCLUDE_INFIX_opt
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/config.hpp.in")
         # If there is one, process and install it.
         target_sources(${TARGET_NAME} PRIVATE src/config.hpp.in)
-        set(config_output "${NAMESPACE}/${ARGV1}config.hpp")
+        set(config_output "${NAMESPACE}/${args_INCLUDE_INFIX}config.hpp")
         configure_file(src/config.hpp.in "include/${config_output}" ESCAPE_QUOTES)
         # TODO: libraries might want to not install private config.
         if(NOT project_type STREQUAL EXECUTABLE)
             install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/${config_output}"
-                    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${NAMESPACE}/${ARGV1}"
+                    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${NAMESPACE}/${args_INCLUDE_INFIX}"
                     COMPONENT ${alias_name}
             )
         endif()

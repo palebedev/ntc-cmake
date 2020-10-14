@@ -11,7 +11,7 @@ ntc-target-helpers
 Provides the following command:
 
 ```CMake
-ntc_target(<target> [include_infix])
+ntc_target(<target> [INCLUDE_INFIX <include_infix>])
 ```
 
 Before calling this function, set the value of `NAMESPACE` and, optionally, `COMPONENT` variables to specify structured name of the target.
