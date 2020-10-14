@@ -5,10 +5,10 @@
 
 include_guard(GLOBAL)
 
-# Without this all standard tests will fail with IPO enabled, as
-# IPO flags won't be added to linking step.
 if(IPO_SUPPORTED)
-    list(APPEND CMAKE_REQUIRED_FLAGS ${CMAKE_CXX_COMPILE_OPTIONS_IPO} ${CMAKE_CXX14_STANDARD_COMPILE_OPTION})
+    # Add IPO flags if it's enabled to ensure we fail checks for flags
+    # that are incompatible with IPO.
+    list(APPEND CMAKE_REQUIRED_FLAGS ${CMAKE_CXX_COMPILE_OPTIONS_IPO})
 endif()
 
 # Generate identifer for ${FLAG} and store it into variable named ${OUTPUT}.
