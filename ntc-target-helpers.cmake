@@ -10,11 +10,12 @@ include_guard(GLOBAL)
 # Used to provide subpath customization and handle lib32/lib64, etc.
 include(GNUInstallDirs)
 
-# ntc_target(<target_name> [INCLUDE_INFIX <include_infix>])
+# ntc_target(<target_name> [INCLUDE_INFIX <include_infix>] [PRIVATE_CONFIG])
 # Helper function to setup common target configuration for target <target_name>.
 # If <include_infix> is specified, it is inserted between
 # include/${NAMESPACE}/ and config/export header names. That is, to put
 # headers in subdirectory subdir, specify "subdir/" as include infix.
+# PRIVATE_CONFIG prevents installation of config header for libraries.
 function(ntc_target TARGET_NAME)
     cmake_parse_arguments(PARSE_ARGV 1 args "" "INCLUDE_INFIX" "")
     if(args_UNPARSED_ARGUMENTS OR args_KEYWORDS_MISSING_VALUES)
@@ -130,12 +131,15 @@ function(ntc_target TARGET_NAME)
         target_sources(${TARGET_NAME} PRIVATE src/config.hpp.in)
         set(config_output "${NAMESPACE}/${args_INCLUDE_INFIX}config.hpp")
         configure_file(src/config.hpp.in "include/${config_output}" ESCAPE_QUOTES)
-        # TODO: libraries might want to not install private config.
-        if(NOT project_type STREQUAL EXECUTABLE)
+        if(NOT project_type STREQUAL EXECUTABLE AND NOT args_PRIVATE_CONFIG)
             install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/${config_output}"
                     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${NAMESPACE}/${args_INCLUDE_INFIX}"
                     COMPONENT ${alias_name}
             )
+        endif()
+    else()
+        if(args_PRIVATE_CONFIG)
+            message(SEND_ERROR "PRIVATE_CONFIG was specified, but no config file template found")
         endif()
     endif()
 

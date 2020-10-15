@@ -11,7 +11,7 @@ ntc-target-helpers
 Provides the following command:
 
 ```CMake
-ntc_target(<target> [INCLUDE_INFIX <include_infix>])
+ntc_target(<target> [INCLUDE_INFIX <include_infix>] [PRIVATE_CONFIG])
 ```
 
 Before calling this function, set the value of `NAMESPACE` and, optionally, `COMPONENT` variables to specify structured name of the target.
@@ -20,7 +20,7 @@ Before calling this function, set the value of `NAMESPACE` and, optionally, `COM
 
 - An alias target named `${NAMESPACE}::${COMPONENT}` or `${NAMESPACE}::${NAMESPACE}` if `COMPONENT` is unset.
 - Target binary is installed.
-- If a file named `src/config.hpp.in` exists in current source directory, it is processed with `configure_file` in `ESCAPE_QUOTES` mode and the result is written to `include/${NAMESPACE}/${include_infix}/config.hpp` in current binary directory. Unless the target is an executable, this header is installed.
+- If a file named `src/config.hpp.in` exists in current source directory, it is processed with `configure_file` in `ESCAPE_QUOTES` mode and the result is written to `include/${NAMESPACE}/${include_infix}/config.hpp` in current binary directory. Unless the target is an executable or `PRIVATE_CONFIG` is specified, this header is installed.
 - If the target is a library:
   - Object libraries are not supported and rejected with an error.
   - Subdirectory `include/${NAMESPACE}` in current source directory is installed.
