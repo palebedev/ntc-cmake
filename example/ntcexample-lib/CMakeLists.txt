@@ -25,10 +25,11 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 include(CheckCXXSourceCompiles)
 
-check_cxx_source_compiles("#include <wmmintrin.h>
-    int main() {
-        __m128i a{},b{};
-        _mm_clmulepi64_si128(a,b,0);
+check_cxx_source_compiles("#include <emmintrin.h>
+    #include <wmmintrin.h>
+    int main(int argc,char* /*argv*/[]) {
+        return (int)_mm_cvtsi128_si64(_mm_clmulepi64_si128(
+            _mm_cvtsi64_si128(argc),_mm_cvtsi64_si128(argc),0));
     }" HAVE_MM_CLMULEPI64_SI128)
 include(FeatureSummary)
 add_feature_info(PCLMUL HAVE_MM_CLMULEPI64_SI128
