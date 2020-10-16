@@ -47,12 +47,6 @@ endfunction()
 
 include(CheckCXXCompilerFlag)
 
-# ntc_check_cxx_compiler_flag(<flag> [STRIP_VALUE] [OUTPUT_NAME <output_name>])
-# Check if an empty project compiles with c++ compiler flag <flag>.
-# Generates a name for the result of the check and stores
-# it into variable named <output_name> in caller's scope if provided.
-# If STRIP_VALUE is specified, remove equals sign and text after it from
-# generated variable name.
 function(ntc_check_cxx_compiler_flag FLAG)
     _ntc_check_flag_args_common("${FLAG}" ${ARGN})
     check_cxx_compiler_flag("${flag_parsed}" ${var_name})
@@ -62,12 +56,6 @@ function(ntc_check_cxx_compiler_flag FLAG)
     set(${var_name} ${${var_name}} PARENT_SCOPE)
 endfunction()
 
-# ntc_check_linker_flag(<flag> [STRIP_VALUE] [OUTPUT_NAME <output_name>])
-# Check if an empty project compiles with linker flag <flag>.
-# Generates a name for the result of the check and stores
-# it into variable named <output_name> in caller's scope if provided.
-# If STRIP_VALUE is specified, remove equals sign and text after it from
-# generated variable name.
 function(ntc_check_linker_flag FLAG)
     _ntc_check_flag_args_common("${FLAG}" ${ARGN})
     list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "${flag_parsed}")

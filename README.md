@@ -16,7 +16,7 @@ ntc_target(<target> [INCLUDE_INFIX <include_infix>] [PRIVATE_CONFIG])
 
 Before calling this function, set the value of `NAMESPACE` and, optionally, `COMPONENT` variables to specify structured name of the target.
 
-`ntc_target` applies the following changes to target:
+`ntc_target` applies the following changes to *target*:
 
 - An alias target named `${NAMESPACE}::${COMPONENT}` or `${NAMESPACE}::${NAMESPACE}` if `COMPONENT` is unset.
 - Target binary is installed.
@@ -44,3 +44,20 @@ This module includes `ntc-target-helpers` and modifies functionality of `ntc_tar
 - If Boost or Qt libraries are found in direct dependencies of the target, additional preprocessor definitions and module options are enabled. See `ntc-dev-build.cmake` for full list.
 - Interprocedural optimizations are enabled, if supported. Full LTO is preferred to thin in release builds.
 - Unity builds are enabled for release build types.
+
+ntc-checks
+----------
+
+This module provides the following commands:
+
+```CMake
+ntc_check_cxx_compiler_flag(<flag> [STRIP_VALUE] [OUTPUT_NAME <output_name>])
+```
+Check if an empty project compiles with c++ compiler *flag*.
+Generates a name for the result of the check and stores it into variable named *output_name* in caller's scope if provided.
+If `STRIP_VALUE` is specified, remove equals sign and text after it from the generated variable name.
+
+```CMake
+ntc_check_linker_flag(<flag> [STRIP_VALUE] [OUTPUT_NAME <output_name>])
+```
+As above, but checks if *flag* is accepted by linker.
