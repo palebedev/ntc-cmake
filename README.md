@@ -56,11 +56,11 @@ This module provides the following commands:
 ```CMake
 ntc_check_cxx_compiler_flag(<flag> [STRIP_VALUE] [OUTPUT_NAME <output_name>])
 ```
-Check if an empty project compiles with c++ compiler *flag*.
-Generates a name for the result of the check and stores it into variable named *output_name* in caller's scope if provided.
+Check if an empty project compiles with c++ compiler `${flag}`.
+Generates a name for the result of the check and stores it into variable `${output_name}` in caller's scope if provided.
 If `STRIP_VALUE` is specified, remove equals sign and text after it from the generated variable name.
 
 ```CMake
 ntc_check_linker_flag(<flag> [STRIP_VALUE] [OUTPUT_NAME <output_name>])
 ```
-As above, but checks if *flag* is accepted by linker.
+As above, but checks if `${flag}` is accepted by linker.
