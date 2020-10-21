@@ -141,7 +141,7 @@ function(ntc_target TARGET_NAME)
     foreach(incdir "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include")
         if(EXISTS "${incdir}")
             # These directories are used only during build, common include directory
-            # where everthing gets installed is specified in install(TARGETS ... INCLUDES DESTINATION)
+            # where everything gets installed is specified in install(TARGETS ... INCLUDES DESTINATION)
             target_include_directories(${TARGET_NAME} ${include_type} "$<BUILD_INTERFACE:${incdir}>")
         endif()
     endforeach()
