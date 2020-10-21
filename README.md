@@ -64,3 +64,12 @@ If `STRIP_VALUE` is specified, remove equals sign and text after it from the gen
 ntc_check_linker_flag(<flag> [STRIP_VALUE] [OUTPUT_NAME <output_name>])
 ```
 As above, but checks if `${flag}` is accepted by linker.
+
+Usage
+-----
+
+Root of this repository contains an example project using ntc-cmake.
+
+To use ntc-cmake itself you can either:
+- Build ntc-cmake subdirectory and install it. When ntc-cmake is the root of cmake source directory, it installs itself into prefix to be used by other projects by using `find_package`.
+- Make ntc-cmake subdirectory a part of your project ("bundled") by copying, using git submodules or otherwise. When ntc-cmake is included with `add_subdirectory` it *won't* install itself with the project.
