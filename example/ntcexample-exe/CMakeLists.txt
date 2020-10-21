@@ -5,9 +5,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-set(NAMESPACE ntcexample)
-set(COMPONENT exe)
-project(${NAMESPACE}-${COMPONENT}
+project(ntcexample-exe
         VERSION 0.0.0
         DESCRIPTION "ntcexample executable"
         LANGUAGES CXX
@@ -24,4 +22,4 @@ find_package(ntcexample-lib)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ntcexample::lib)
 
-ntc_target(${PROJECT_NAME})
+ntc_target(${PROJECT_NAME} ALIAS_NAME ntcexample::exe)

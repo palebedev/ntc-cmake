@@ -5,9 +5,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-set(NAMESPACE ntcexample)
-set(COMPONENT lib)
-project(${NAMESPACE}-${COMPONENT}
+project(ntcexample-lib
         VERSION 0.0.0
         DESCRIPTION "ntcexample library"
         LANGUAGES CXX
@@ -38,4 +36,8 @@ add_feature_info(PCLMUL HAVE_MM_CLMULEPI64_SI128
 find_package(Boost REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::headers)
 
-ntc_target(${PROJECT_NAME})
+ntc_target(${PROJECT_NAME}
+    ALIAS_NAME ntcexample::lib
+    HEADER_PREFIX ntcexample/
+    PRIVATE_CONFIG
+)

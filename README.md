@@ -11,24 +11,27 @@ ntc-target-helpers
 Provides the following command:
 
 ```CMake
-ntc_target(<target> [INCLUDE_INFIX <include_infix>] [PRIVATE_CONFIG])
+ntc_target(<target> [ALIAS_NAME <alias_name>]
+                    [HEADER_PREFIX <header_prefix>]
+                    [PRIVATE_CONFIG]
+)
 ```
 
-Before calling this function, set the value of `NAMESPACE` and, optionally, `COMPONENT` variables to specify structured name of the target.
+`ntc_target` applies the following changes to `${target}`:
 
-`ntc_target` applies the following changes to *target*:
-
-- An alias target named `${NAMESPACE}::${COMPONENT}` or `${NAMESPACE}::${NAMESPACE}` if `COMPONENT` is unset.
+- An alias target named `${alias_name}` is created. When `alias_name` is not specified, this defaults to `${target}::${target}`.
+- When any of the following steps installs any files, corresponding locations from `GNUInstallDirs` are used, unless specified otherwise.
 - Target binary is installed.
-- If a file named `src/config.hpp.in` exists in current source directory, it is processed with `configure_file` in `ESCAPE_QUOTES` mode and the result is written to `include/${NAMESPACE}/${include_infix}/config.hpp` in current binary directory. Unless the target is an executable or `PRIVATE_CONFIG` is specified, this header is installed.
+- The following steps may generate files in current build directory. Names of these files are prefixed with `include/${header_prefix}`. When `header_prefix` is not specified, this defaults to `include/${target}/`.
+- If a file named `src/config.hpp.in` exists in current source directory, it is processed with `configure_file` in `ESCAPE_QUOTES` mode and the result is written to `config.hpp`. Unless the target is an executable or `PRIVATE_CONFIG` is specified, this header is installed.
 - If the target is a library:
   - Object libraries are not supported and rejected with an error.
-  - Subdirectory `include/${NAMESPACE}` in current source directory is installed.
+  - Everything in `include` subdirectory in current source directory is installed.
   - Binary version is set to the version of current project.
-  - For library targets that are not interface libraries, an export header `include/${NAMESPACE}/${include_infix}export.h` is created in current binary directory. This header is then installed.
-- `include` subdirectories under current source and binary directories are added to the target include directories, if present. These includes are added as `PUBLIC` for libraries and `PRIVATE` for executables and are effective only during build.
+  - For library targets that are not interface libraries, an export header `export.h` is created with `generate_export_header`. This header is then installed.
+- `include` subdirectories under current source and binary directories are added to the target include directories, if present. These includes are added as `PUBLIC` for libraries and `PRIVATE` for executables and are effective only during build. When the package is installed, `${CMAKE_INSTALL_INCLUDEDIR` is used instead in config files.
 - C++ standard extensions are disabled for target.
-- If the file `<target>-config.cmake.in` exists in current source directory, it is processed with `configure_package_config_file` from `CMakePackageConfigHelpers` module. A package version file is generated with the current project's version and compatibility mode `SameMajorVersion`. These cmake modules and the corresponding target export module are then installed into subdirectory `${NAMESPACE}` under cmake module path in install prefix directory.
+- If the file `<target>-config.cmake.in` exists in current source directory, it is processed with `configure_package_config_file` from `CMakePackageConfigHelpers` module. A package version file is generated with the current project's version and compatibility mode `SameMajorVersion`. These cmake modules and the corresponding target export module are then installed into subdirectory `${target}` under cmake module path in install prefix directory.
 
 Inclusion of this module modifies behavior of `find_package` command to ignore requests to find packages with the names of targets processed with `ntc_target` before. As the latter registers alias targets, this allows for uniform usage of `find_package`.
 

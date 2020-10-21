@@ -11,33 +11,34 @@ include_guard(GLOBAL)
 include(GNUInstallDirs)
 
 function(ntc_target TARGET_NAME)
-    cmake_parse_arguments(PARSE_ARGV 1 args "PRIVATE_CONFIG" "INCLUDE_INFIX" "")
+    cmake_parse_arguments(PARSE_ARGV 1 args "PRIVATE_CONFIG" "ALIAS_NAME;HEADER_PREFIX" "")
     if(args_UNPARSED_ARGUMENTS OR args_KEYWORDS_MISSING_VALUES)
         message(SEND_ERROR "Invalid arguments to ntc_target")
     endif()
-
-    if(COMPONENT)
-        set(alias_name "${NAMESPACE}::${COMPONENT}")
-    else()
-        set(alias_name "${NAMESPACE}::${NAMESPACE}")
+    if(NOT args_ALIAS_NAME)
+        set(args_ALIAS_NAME "${TARGET_NAME}::${TARGET_NAME}")
+    endif()
+    if(NOT args_HEADER_PREFIX)
+        set(args_HEADER_PREFIX "${TARGET_NAME}/")
     endif()
 
     get_target_property(project_type ${TARGET_NAME} TYPE)
+    get_filename_component(generated_header_path "${args_HEADER_PREFIX}x" DIRECTORY)
 
     if(project_type STREQUAL OBJECT_LIBRARY)
         message(FATAL_ERROR "ntc_setup doesn't support object libraries")
     elseif(project_type STREQUAL EXECUTABLE)
         set(include_type PRIVATE)
 
-        add_executable(${alias_name} ALIAS ${TARGET_NAME})
+        add_executable(${args_ALIAS_NAME} ALIAS ${TARGET_NAME})
 
         install(TARGETS ${TARGET_NAME}
-                COMPONENT ${alias_name}
+                COMPONENT ${args_ALIAS_NAME}
         )
     else() # {STATIC,MODULE,SHARED,INTERFACE}_LIBRARY
         set(include_type PUBLIC)
 
-        add_library(${alias_name} ALIAS ${TARGET_NAME})
+        add_library(${args_ALIAS_NAME} ALIAS ${TARGET_NAME})
 
         set_target_properties(${TARGET_NAME} PROPERTIES
             # Current library version is same as this project ("max API supported").
@@ -47,13 +48,12 @@ function(ntc_target TARGET_NAME)
         if(NOT project_type STREQUAL INTERFACE_LIBRARY)
             # Support proper visibility/dllexport handling for shared library builds.
             include(GenerateExportHeader)
-            generate_export_header(${TARGET_NAME}
-                EXPORT_FILE_NAME include/${NAMESPACE}/${args_INCLUDE_INFIX}export.h)
-            target_sources(${TARGET_NAME} PRIVATE
-                ${CMAKE_CURRENT_BINARY_DIR}/include/${NAMESPACE}/${args_INCLUDE_INFIX}export.h)
-            install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/${NAMESPACE}/${args_INCLUDE_INFIX}export.h
-                    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${NAMESPACE}/${args_INCLUDE_INFIX}"
-                    COMPONENT ${alias_name}
+            set(export_header "include/${args_HEADER_PREFIX}export.h")
+            generate_export_header(${TARGET_NAME} EXPORT_FILE_NAME ${export_header})
+            target_sources(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/${export_header})
+            install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${export_header}
+                    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${generated_header_path}"
+                    COMPONENT ${args_ALIAS_NAME}
             )
 
             # Use visibility in standard builds.
@@ -73,13 +73,13 @@ function(ntc_target TARGET_NAME)
                 # This provides include directory in exported target
                 # relative to prefix in single directory we've put everything in.
                 INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-                COMPONENT ${alias_name}
+                COMPONENT ${args_ALIAS_NAME}
         )
 
         # Install headers from source tree.
-        install(DIRECTORY include/${NAMESPACE}
+        install(DIRECTORY include/
                 TYPE INCLUDE
-                COMPONENT ${alias_name}
+                COMPONENT ${args_ALIAS_NAME}
         )
     endif()
 
@@ -123,12 +123,12 @@ function(ntc_target TARGET_NAME)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/config.hpp.in")
         # If there is one, process and install it.
         target_sources(${TARGET_NAME} PRIVATE src/config.hpp.in)
-        set(config_output "${NAMESPACE}/${args_INCLUDE_INFIX}config.hpp")
-        configure_file(src/config.hpp.in "include/${config_output}" ESCAPE_QUOTES)
+        set(config_header "include/${args_HEADER_PREFIX}config.hpp")
+        configure_file(src/config.hpp.in "${config_header}" ESCAPE_QUOTES)
         if(NOT project_type STREQUAL EXECUTABLE AND NOT args_PRIVATE_CONFIG)
-            install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/${config_output}"
-                    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${NAMESPACE}/${args_INCLUDE_INFIX}"
-                    COMPONENT ${alias_name}
+            install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${config_header}"
+                    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${generated_header_path}"
+                    COMPONENT ${args_ALIAS_NAME}
             )
         endif()
     else()
@@ -150,12 +150,8 @@ function(ntc_target TARGET_NAME)
     set_target_properties(${TARGET_NAME} PROPERTIES
         # We don't want any language extensions.
         CXX_EXTENSIONS OFF
-        # We can't rely on NAMESPACE option to export/install(EXPORT),
-        # because then we will have to use COMPONENT as logical name,
-        # which will have to be nontrivial to not clash with other projects
-        # in same tree and duplicate parts of namespace name.
-        # Set proper EXPORT_NAME manually.
-        EXPORT_NAME "${alias_name}"
+        # Set EXPORT_NAME once for export/install(EXPORT).
+        EXPORT_NAME "${args_ALIAS_NAME}"
     )
 
     if(NTC_DEV_BUILD)
@@ -179,7 +175,7 @@ function(ntc_target TARGET_NAME)
         # Configure the main package file from source tree.
         configure_package_config_file(${TARGET_NAME}-config.cmake.in
             "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-config.cmake"
-            INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${NAMESPACE}"
+            INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_NAME}"
         )
 
         # Write package version file.
@@ -192,15 +188,15 @@ function(ntc_target TARGET_NAME)
         install(FILES
             "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-config.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-config-version.cmake"
-            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${NAMESPACE}"
-            COMPONENT ${alias_name}
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_NAME}"
+            COMPONENT ${args_ALIAS_NAME}
         )
 
         # This installs package in install tree for using installed targets.
         install(EXPORT ${TARGET_NAME}-targets
                 FILE ${TARGET_NAME}-targets.cmake
-                DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${NAMESPACE}"
-                COMPONENT ${alias_name}
+                DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_NAME}"
+                COMPONENT ${args_ALIAS_NAME}
         )
     endif()
 
