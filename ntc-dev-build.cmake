@@ -139,6 +139,9 @@ if(NTC_DEV_BUILD)
         # gdb complains about .debug_names table making debugging impossible.
         # _ntc_try_append_cxx_flag(-gdwarf-5)
         _ntc_try_append_cxx_flag(-gsplit-dwarf)
+        if(HAVE_GSPLIT_DWARF)
+            _ntc_try_append_linker_flag(-Wl,--gdb-index)
+        endif()
     endif()
 
     list(APPEND NTC_BOOST_DEFINITIONS BOOST_ASIO_NO_DEPRECATED)
