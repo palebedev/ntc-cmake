@@ -11,7 +11,7 @@ include_guard(GLOBAL)
 include(GNUInstallDirs)
 
 function(ntc_target TARGET_NAME)
-    cmake_parse_arguments(PARSE_ARGV 1 args "" "INCLUDE_INFIX" "")
+    cmake_parse_arguments(PARSE_ARGV 1 args "PRIVATE_CONFIG" "INCLUDE_INFIX" "")
     if(args_UNPARSED_ARGUMENTS OR args_KEYWORDS_MISSING_VALUES)
         message(SEND_ERROR "Invalid arguments to ntc_target")
     endif()
