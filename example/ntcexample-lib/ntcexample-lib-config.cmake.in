@@ -11,4 +11,4 @@ find_dependency(Boost)
 
 include("${CMAKE_CURRENT_LIST_DIR}/ntcexample-lib-targets.cmake")
 
-check_required_components(niji-core)
+check_required_components(ntcexample-lib)
