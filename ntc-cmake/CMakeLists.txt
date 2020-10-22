@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(ntc-cmake
         DESCRIPTION "NTC CMake helpers package"
-        VERSION 0.0.0
+        VERSION 1.0.0
         LANGUAGES CXX # Needed to determine CMAKE_INSTALL_LIBDIR
 )
 
