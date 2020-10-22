@@ -72,10 +72,10 @@ function(ntc_target TARGET_NAME)
         # Install library.
         install(TARGETS ${TARGET_NAME}
                 EXPORT ${TARGET_NAME}-targets
+                COMPONENT ${args_ALIAS_NAME}
                 # This provides include directory in exported target
                 # relative to prefix in single directory we've put everything in.
                 INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-                COMPONENT ${args_ALIAS_NAME}
         )
 
         # Install headers from source tree.
