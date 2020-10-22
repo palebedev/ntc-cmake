@@ -18,8 +18,12 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
 )
 
+find_package(ntcexample-headerlib)
 find_package(ntcexample-lib)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ntcexample::lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    ntcexample::headerlib
+    ntcexample::lib
+)
 
 ntc_target(${PROJECT_NAME} ALIAS_NAME ntcexample::exe)

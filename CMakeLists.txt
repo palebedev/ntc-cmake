@@ -23,6 +23,7 @@ endif()
 # in subprojects and establish default for BUILD_SHARED_LIBS.
 include(ntc-dev-build)
 
+add_subdirectory(ntcexample-headerlib)
 add_subdirectory(ntcexample-lib)
 add_subdirectory(ntcexample-exe)
 

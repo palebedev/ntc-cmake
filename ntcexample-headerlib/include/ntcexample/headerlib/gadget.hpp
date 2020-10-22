@@ -3,13 +3,12 @@
 // (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
 // SPDX-License-Identifier: BSL-1.0
 
-#include <ntcexample/headerlib/gadget.hpp>
-#include <ntcexample/widget.hpp>
+#ifndef UUID_AD378116_BED2_4264_90F9_D441FF18EE3E
+#define UUID_AD378116_BED2_4264_90F9_D441FF18EE3E
 
-#include <iostream>
-
-int main()
+namespace ntcexample
 {
-    using ntcexample::widget;
-    std::cout << (widget{15}*widget{17}) << ' ' << ntcexample::answer << '\n';
+    constexpr inline int answer = 42;
 }
+
+#endif

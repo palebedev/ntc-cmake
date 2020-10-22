@@ -36,8 +36,6 @@ function(ntc_target TARGET_NAME)
                 COMPONENT ${args_ALIAS_NAME}
         )
     else() # {STATIC,MODULE,SHARED,INTERFACE}_LIBRARY
-        set(include_type PUBLIC)
-
         add_library(${args_ALIAS_NAME} ALIAS ${TARGET_NAME})
 
         set_target_properties(${TARGET_NAME} PROPERTIES
@@ -45,7 +43,11 @@ function(ntc_target TARGET_NAME)
             VERSION "${PROJECT_VERSION}"
         )
 
-        if(NOT project_type STREQUAL INTERFACE_LIBRARY)
+        if(project_type STREQUAL INTERFACE_LIBRARY)
+            set(include_type INTERFACE)
+        else()
+            set(include_type PUBLIC)
+
             # Support proper visibility/dllexport handling for shared library builds.
             include(GenerateExportHeader)
             set(export_header "include/${args_HEADER_PREFIX}export.h")
@@ -172,30 +174,41 @@ function(ntc_target TARGET_NAME)
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_NAME}-config.cmake.in)
         include(CMakePackageConfigHelpers)
 
+        if(project_type STREQUAL INTERFACE_LIBRARY)
+            # Interface libraries can be installed in generic subdirectory
+            # to be available for every architecture.
+            set(cmake_config_path "lib")
+            set(extra_version_file_args ARCH_INDEPENDENT)
+        else()
+            set(cmake_config_path "${CMAKE_INSTALL_LIBDIR}")
+        endif()
+        set(cmake_config_path "${cmake_config_path}/cmake/${TARGET_NAME}")
+
         # Configure the main package file from source tree.
         configure_package_config_file(${TARGET_NAME}-config.cmake.in
             "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-config.cmake"
-            INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_NAME}"
+            INSTALL_DESTINATION "${cmake_config_path}"
         )
 
         # Write package version file.
         write_basic_package_version_file(${TARGET_NAME}-config-version.cmake
             VERSION ${PROJECT_VERSION}
             COMPATIBILITY SameMajorVersion
+            ${extra_version_file_args}
         )
 
         # Install the generated package version file and the main package file.
         install(FILES
             "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-config.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}-config-version.cmake"
-            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_NAME}"
+            DESTINATION "${cmake_config_path}"
             COMPONENT ${args_ALIAS_NAME}
         )
 
         # This installs package in install tree for using installed targets.
         install(EXPORT ${TARGET_NAME}-targets
                 FILE ${TARGET_NAME}-targets.cmake
-                DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET_NAME}"
+                DESTINATION "${cmake_config_path}"
                 COMPONENT ${args_ALIAS_NAME}
         )
     endif()
