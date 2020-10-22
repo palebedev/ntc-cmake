@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.16)
 project(ntc-cmake
         DESCRIPTION "NTC CMake helpers package"
         VERSION 1.0.0
-        LANGUAGES CXX # Needed to determine CMAKE_INSTALL_LIBDIR
+        LANGUAGES NONE
 )
 
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -19,6 +19,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     write_basic_package_version_file(${PROJECT_NAME}-config-version.cmake
         VERSION ${PROJECT_VERSION}
         COMPATIBILITY SameMajorVersion
+        ARCH_INDEPENDENT
     )
 
     include(GNUInstallDirs)
@@ -29,7 +30,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
         ntc-target-helpers.cmake
         ${PROJECT_NAME}-config.cmake
         "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+        DESTINATION "lib/cmake/${PROJECT_NAME}"
     )
 else()
     message(FATAL_ERROR
