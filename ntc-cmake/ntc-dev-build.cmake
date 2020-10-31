@@ -16,9 +16,6 @@ if(NTC_DEV_BUILD)
     # We can't use interface target plus target_link_libraries, as for static library
     # builds cmake will insist it's a dependency and must be exported.
 
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT IPO_SUPPORTED)
-
     include(ntc-checks)
 
     function(_ntc_try_append_cxx_flag FLAG)
@@ -98,6 +95,11 @@ if(NTC_DEV_BUILD)
     # Optimizations
     _ntc_try_append_linker_flag(-Wl,--as-needed)
     if(CMAKE_BUILD_TYPE MATCHES "Release|MinSizeRel|RelWithDebInfo")
+        include(CheckIPOSupported)
+        check_ipo_supported(RESULT IPO_SUPPORTED)
+        string(REPLACE "=thin" "" CMAKE_C_COMPILE_OPTIONS_IPO "${CMAKE_C_COMPILE_OPTIONS_IPO}")
+        string(REPLACE "=thin" "" CMAKE_CXX_COMPILE_OPTIONS_IPO "${CMAKE_CXX_COMPILE_OPTIONS_IPO}")
+
         _ntc_try_append_cxx_flag(-fno-enforce-eh-specs)
         _ntc_try_append_cxx_flag("SHELL:-Xclang -fexternc-nounwind")
         _ntc_try_append_cxx_flag(-fipa-pta)
@@ -122,8 +124,6 @@ if(NTC_DEV_BUILD)
         set(NTC_BOOST_DEFINITIONS
             BOOST_DISABLE_ASSERTS
             BOOST_EXCEPTION_DISABLE BOOST_HANA_CONFIG_DISABLE_CONCEPT_CHECKS)
-        string(REPLACE "=thin" "" CMAKE_C_COMPILE_OPTIONS_IPO "${CMAKE_C_COMPILE_OPTIONS_IPO}")
-        string(REPLACE "=thin" "" CMAKE_CXX_COMPILE_OPTIONS_IPO "${CMAKE_CXX_COMPILE_OPTIONS_IPO}")
     elseif(CMAKE_BUILD_TYPE STREQUAL Debug)
         _ntc_try_append_cxx_flag(-ftrivial-auto-var-init=pattern)
         include(CheckIncludeFileCXX)
@@ -131,9 +131,6 @@ if(NTC_DEV_BUILD)
         if(HAVE_VALGRIND_H)
             set(NTC_BOOST_DEFINITIONS BOOST_USE_VALGRIND)
         endif()
-    endif()
-    if(CMAKE_C_COMPILE_OPTIONS_IPO MATCHES thin OR CMAKE_CXX_COMPILE_OPTIONS_IPO MATCHES thin)
-        _ntc_try_append_linker_flag("-Wl,--thinlto-cache-dir=${CMAKE_BINARY_DIR}/.thinlto-cache" STRIP_VALUE)
     endif()
     if(CMAKE_BUILD_TYPE MATCHES "Debug|RelWithDebInfo")
         # gdb complains about .debug_names table making debugging impossible.
