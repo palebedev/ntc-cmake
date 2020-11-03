@@ -32,7 +32,12 @@ ntc_target(<target> [ALIAS_NAME <alias_name>]
   - Binary version is set to the version of current project.
   - For library targets that are not interface libraries, an export header `export.h` is created with `generate_export_header`. This header is then installed.
 - `include` subdirectories under current source and binary directories are added to the target include directories, if present. These includes are added as `PUBLIC` for libraries and `PRIVATE` for executables and are effective only during build. When the package is installed, `${CMAKE_INSTALL_INCLUDEDIR` is used instead in config files.
-- C++ standard extensions are disabled for target.
+- The following target properties are set:
+  - `CXX_EXTENSIONS OFF`: disable C++ standard extensions.
+  - `AUTOMOC ON` if target links directly to any Qt5 component: enable Qt Meta Object Compiler.
+  - `AUTOUIC ON` if target sources contain `.ui` files: enable Qt UI Compiler.
+  - `AUTORCC ON` if target sources contain `.qrc` files: enable Qt Resource Compiler.
+  - `WIN32_EXECUTABLE ON` if target links directly to `Qt5::Widgets`: disable creation of new console for the application when run on Windows.
 - If the file `<target>-config.cmake.in` exists in current source directory, it is processed with `configure_package_config_file` from `CMakePackageConfigHelpers` module. A package version file is generated with the current project's version and compatibility mode `SameMajorVersion`. These cmake modules and the corresponding target export module are then installed into subdirectory `${target}` under cmake module path in install prefix directory.
 - If `TRANSLATIONS` are specified, it is assumed `find_packahe(Qt5 COMPONENTS LinguistTools)` has been called successfully. For each `lang` specified the translation is expected to be stored under `translations/${target}_{lang}.ts` in source directory. All translations are compiled to `.qm` files in `translations` subdirectory in build directory and installed to `${CMAKE_INSTALL_DATADIR}/${target}/translations`. A target named `${target}-lupdate` is created that calls `lupdate` for these `.ts` files and whole current source directory. A target named just `lupdate` depends on all target-specific lupdate targets. These lupdate targets must be built manually, no other target depends on them.
 
