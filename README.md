@@ -25,7 +25,7 @@ ntc_target(<target> [ALIAS_NAME <alias_name>]
 - Target binary is installed.
 - The following steps may generate files in current build directory. Names of these files are prefixed with `include/${header_prefix}`. When `header_prefix` is not specified, this defaults to `include/${target}/`.
 - If a file named `src/config.hpp.in` exists in current source directory, it is processed with `configure_file` in `ESCAPE_QUOTES` mode and the result is written to `config.hpp`. Unless the target is an executable or `PRIVATE_CONFIG` is specified, this header is installed. The following variables will be computed to be available in this file:
-  - `<ID_TARGET>_REL_DATADIR`, where `ID_TARGET_NAME` is the result of applying `MAKE_C_IDENTIFIER` and `TOUPPER` `string` CMake operations to `${target}`, is set to relative path from `${CMAKE_INSTALL_BINDIR}` to `${CMAKE_INSTALL_DATADIR}/${target}` which may be used to find application resources when installed to prefix.
+  - `<ID_TARGET>_REL_DATADIR`, where `ID_TARGET` is the result of applying `MAKE_C_IDENTIFIER` and `TOUPPER` `string` CMake operations to `${target}`, is set to relative path from `${CMAKE_INSTALL_BINDIR}` to `${CMAKE_INSTALL_DATADIR}/${target}` which may be used to find application resources when installed to prefix.
 - If the target is a library:
   - Object libraries are not supported and rejected with an error.
   - Everything in `include` subdirectory in current source directory is installed.
