@@ -11,7 +11,8 @@ include_guard(GLOBAL)
 include(GNUInstallDirs)
 
 function(ntc_target TARGET_NAME)
-    cmake_parse_arguments(PARSE_ARGV 1 args "PRIVATE_CONFIG" "ALIAS_NAME;HEADER_PREFIX" "")
+    cmake_parse_arguments(PARSE_ARGV 1 args
+        "PRIVATE_CONFIG" "ALIAS_NAME;HEADER_PREFIX" "TRANSLATIONS")
     if(args_UNPARSED_ARGUMENTS OR args_KEYWORDS_MISSING_VALUES)
         message(SEND_ERROR "Invalid arguments to ntc_target")
     endif()
@@ -121,6 +122,15 @@ function(ntc_target TARGET_NAME)
         )
     endif()
 
+    # Set <TARGET_NAME>_REL_DATADIR in outer scope to relative
+    # path from binary directory to data inside prefix.
+    string(MAKE_C_IDENTIFIER "${TARGET_NAME}" rel_datadir_name)
+    string(TOUPPER "${rel_datadir_name}" rel_datadir_name)
+    set(rel_datadir_name "${rel_datadir_name}_REL_DATADIR")
+    file(RELATIVE_PATH ${rel_datadir_name}
+         "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}"
+         "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/${TARGET_NAME}")
+
     # Look for configuration file in source directory.
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/config.hpp.in")
         # If there is one, process and install it.
@@ -168,6 +178,35 @@ function(ntc_target TARGET_NAME)
                 UNITY_BUILD ON
             )
         endif()
+    endif()
+
+    if(args_TRANSLATIONS)
+        foreach(lang IN LISTS args_TRANSLATIONS)
+            list(APPEND ts_files "${CMAKE_CURRENT_SOURCE_DIR}/translations/${TARGET_NAME}_${lang}.ts")
+        endforeach()
+        target_sources(${TARGET_NAME} PRIVATE ${ts_files})
+        set_source_files_properties(${ts_files} PROPERTIES
+            OUTPUT_LOCATION translations
+        )
+        # qt5_create_translation mentions .ts file in
+        # add_custom_command(OUTPUT ...), which causes them to be deleted
+        # by clean target. No workaround currently, see QTBUG-31860,41736,76410.
+        # This also causes lupdate to be run on every build unconditionally.
+        # Instead just build .qm's from .ts files automatically and create
+        # a special target for lupdate to be run manually.
+        qt5_add_translation(qm_files ${ts_files})
+        target_sources(${TARGET_NAME} PRIVATE ${qm_files})
+        install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/translations"
+                DESTINATION "${CMAKE_INSTALL_DATADIR}/${TARGET_NAME}"
+        )
+        add_custom_target(${TARGET_NAME}-lupdate
+            COMMAND ${Qt5_LUPDATE_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR} -ts ${ts_files}
+            VERBATIM
+        )
+        if(NOT TARGET lupdate)
+            add_custom_target(lupdate)
+        endif()
+        add_dependencies(lupdate ${TARGET_NAME}-lupdate)
     endif()
 
     # Export targets if there is a package file.

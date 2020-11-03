@@ -14,6 +14,7 @@ Provides the following command:
 ntc_target(<target> [ALIAS_NAME <alias_name>]
                     [HEADER_PREFIX <header_prefix>]
                     [PRIVATE_CONFIG]
+                    [TRANSLATIONS lang1 [lang2...]]
 )
 ```
 
@@ -23,7 +24,8 @@ ntc_target(<target> [ALIAS_NAME <alias_name>]
 - When any of the following steps installs any files, corresponding locations from `GNUInstallDirs` are used, unless specified otherwise.
 - Target binary is installed.
 - The following steps may generate files in current build directory. Names of these files are prefixed with `include/${header_prefix}`. When `header_prefix` is not specified, this defaults to `include/${target}/`.
-- If a file named `src/config.hpp.in` exists in current source directory, it is processed with `configure_file` in `ESCAPE_QUOTES` mode and the result is written to `config.hpp`. Unless the target is an executable or `PRIVATE_CONFIG` is specified, this header is installed.
+- If a file named `src/config.hpp.in` exists in current source directory, it is processed with `configure_file` in `ESCAPE_QUOTES` mode and the result is written to `config.hpp`. Unless the target is an executable or `PRIVATE_CONFIG` is specified, this header is installed. The following variables will be computed to be available in this file:
+  - `<ID_TARGET>_REL_DATADIR`, where `ID_TARGET_NAME` is the result of applying `MAKE_C_IDENTIFIER` and `TOUPPER` `string` CMake operations to `${target}`, is set to relative path from `${CMAKE_INSTALL_BINDIR}` to `${CMAKE_INSTALL_DATADIR}/${target}` which may be used to find application resources when installed to prefix.
 - If the target is a library:
   - Object libraries are not supported and rejected with an error.
   - Everything in `include` subdirectory in current source directory is installed.
@@ -32,6 +34,7 @@ ntc_target(<target> [ALIAS_NAME <alias_name>]
 - `include` subdirectories under current source and binary directories are added to the target include directories, if present. These includes are added as `PUBLIC` for libraries and `PRIVATE` for executables and are effective only during build. When the package is installed, `${CMAKE_INSTALL_INCLUDEDIR` is used instead in config files.
 - C++ standard extensions are disabled for target.
 - If the file `<target>-config.cmake.in` exists in current source directory, it is processed with `configure_package_config_file` from `CMakePackageConfigHelpers` module. A package version file is generated with the current project's version and compatibility mode `SameMajorVersion`. These cmake modules and the corresponding target export module are then installed into subdirectory `${target}` under cmake module path in install prefix directory.
+- If `TRANSLATIONS` are specified, it is assumed `find_packahe(Qt5 COMPONENTS LinguistTools)` has been called successfully. For each `lang` specified the translation is expected to be stored under `translations/${target}_{lang}.ts` in source directory. All translations are compiled to `.qm` files in `translations` subdirectory in build directory and installed to `${CMAKE_INSTALL_DATADIR}/${target}/translations`. A target named `${target}-lupdate` is created that calls `lupdate` for these `.ts` files and whole current source directory. A target named just `lupdate` depends on all target-specific lupdate targets. These lupdate targets must be built manually, no other target depends on them.
 
 Inclusion of this module modifies behavior of `find_package` command to ignore requests to find packages with the names of targets processed with `ntc_target` before. As the latter registers alias targets, this allows for uniform usage of `find_package`.
 
