@@ -189,7 +189,9 @@ function(ntc_target TARGET_NAME)
 
     if(NTC_DEV_BUILD)
         # Enable IPO in standard builds, if supported.
-        if(IPO_SUPPORTED)
+        # Clang+LTO miscompiles Qt signal connections:
+        # https://bugs.llvm.org/show_bug.cgi?id=46469
+        if(IPO_SUPPORTED AND NOT (qt5_dep AND CMAKE_CXX_COMPILER_ID MATCHES Clang))
             set_target_properties(${TARGET_NAME} PROPERTIES
                 INTERPROCEDURAL_OPTIMIZATION ON
             )
