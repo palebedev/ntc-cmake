@@ -143,7 +143,7 @@ function(ntc_target TARGET_NAME)
         endif()
     endif()
 
-    # Set <TARGET_NAME>_REL_DATADIR in outer scope to relative
+    # Set <TARGET_NAME>_REL_DATADIR to relative
     # path from binary directory to data inside prefix.
     string(MAKE_C_IDENTIFIER "${TARGET_NAME}" rel_datadir_name)
     string(TOUPPER "${rel_datadir_name}" rel_datadir_name)
