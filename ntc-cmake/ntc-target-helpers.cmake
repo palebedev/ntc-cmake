@@ -86,6 +86,24 @@ function(ntc_target TARGET_NAME)
         )
     endif()
 
+    # GCC needs -fcoroutines even with -std=c++20, check for it and apply.
+    # We only check compile features, not CXX_STANDARD, which is not properly
+    # inherited.
+    get_target_property(_features ${TARGET_NAME} COMPILE_FEATURES)
+    get_target_property(_interface_features ${TARGET_NAME} INTERFACE_COMPILE_FEATURES)
+    if(cxx_std_20 IN_LIST _features OR cxx_std_20 IN_LIST _interface_features)
+        include(ntc-checks)
+        ntc_check_cxx_compiler_flag(-fcoroutines)
+        if(HAVE_FCOROUTINES)
+            if(cxx_std_20 IN_LIST _features)
+                target_compile_options(${TARGET_NAME} PRIVATE -fcoroutines)
+            endif()
+            if(cxx_std_20 IN_LIST _interface_features)
+                target_compile_options(${TARGET_NAME} INTERFACE -fcoroutines)
+            endif()
+        endif()
+    endif()
+
     # Activate AUTO{MOC,UIC,RCC},WIN32_EXECUTABLE automatically if
     # relevant deps are found, also add NTC_{BOOST,QT}_DEFINITIONS if
     # set by ntc-dev-build.

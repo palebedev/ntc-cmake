@@ -34,6 +34,7 @@ ntc_target(<target> [ALIAS_NAME <alias_name>]
 - `include` subdirectories under current source and binary directories are added to the target include directories, if present. These includes are added as `PUBLIC` for libraries and `PRIVATE` for executables and are effective only during build. When the package is installed, `${CMAKE_INSTALL_INCLUDEDIR` is used instead in config files.
 - The following target properties are set:
   - `CXX_EXTENSIONS OFF`: disable C++ standard extensions.
+  - `COMPILE_OPTIONS` and `INTERFACE_COMPILE_OPTIONS` are accordingly extended with `-fcoroutines`, if `COMPILE_FEATURES` or `INTERFACE_COMPILE_FEATURES` contain `cxx_std_20`, which is required by GCC to enable C++20 coroutine support.
   - `AUTOMOC ON` if target links directly to any Qt5 component: enable Qt Meta Object Compiler.
   - `AUTOUIC ON` if target sources contain `.ui` files: enable Qt UI Compiler.
   - `AUTORCC ON` if target sources contain `.qrc` files: enable Qt Resource Compiler.
