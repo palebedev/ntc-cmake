@@ -22,8 +22,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
         ARCH_INDEPENDENT
     )
 
-    include(GNUInstallDirs)
-
     install(FILES
         ntc-checks.cmake
         ntc-dev-build.cmake
