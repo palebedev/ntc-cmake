@@ -206,12 +206,10 @@ function(ntc_target TARGET_NAME)
         )
     endif()
 
-    # Set our output properties.
+    # Set common output properties.
     set_target_properties(${TARGET_NAME} PROPERTIES
         # We don't want any language extensions.
         CXX_EXTENSIONS OFF
-        # Set EXPORT_NAME once for export/install(EXPORT).
-        EXPORT_NAME "${args_ALIAS_NAME}"
     )
 
     if(NTC_DEV_BUILD)
@@ -261,6 +259,11 @@ function(ntc_target TARGET_NAME)
 
     # Export targets if there is a package file.
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_NAME}-config.cmake.in)
+        # Set EXPORT_NAME once for export/install(EXPORT).
+        set_target_properties(${TARGET_NAME} PROPERTIES
+            EXPORT_NAME "${args_ALIAS_NAME}"
+        )
+
         include(CMakePackageConfigHelpers)
 
         if(project_type STREQUAL INTERFACE_LIBRARY)
