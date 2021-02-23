@@ -226,6 +226,10 @@ function(ntc_target TARGET_NAME)
                 UNITY_BUILD ON
             )
         endif()
+        # Make build directory relocatable.
+        set_target_properties(${TARGET_NAME} PROPERTIES
+            BUILD_RPATH_USE_ORIGIN ON
+        )
         # INSTALL_RPATH_USE_LINK_PATH adds linker paths of linked in libraries
         # to runtime linker path (rpath), but doesn't add lib subdirectory of the
         # install prefix itself. If we're processing an executable/shared library and
