@@ -62,6 +62,7 @@ This module includes `ntc-target-helpers` and modifies functionality of `ntc_tar
   - `INSTALL_RPATH_USE_LINK_PATH` target property is set (usually done by setting `CMAKE_INSTALL_RPATH_USE_LINK_PATH` variable);
   - The target is an executable, module or shared library which links to at least one non-imported module or shared library.
   - Library install prefix subdirectory is not implicitly available to the dynamic linker.
+
   When all are true, library install prefix will be added to `INSTALL_RPATH` of the target. If the platform supports relative runtime paths, they are used, absolute path is used as a fallback.
 
 ntc-checks
