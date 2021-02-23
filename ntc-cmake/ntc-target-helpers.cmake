@@ -226,6 +226,39 @@ function(ntc_target TARGET_NAME)
                 UNITY_BUILD ON
             )
         endif()
+        # INSTALL_RPATH_USE_LINK_PATH adds linker paths of linked in libraries
+        # to runtime linker path (rpath), but doesn't add lib subdirectory of the
+        # install prefix itself. If we're processing an executable/shared library and
+        # the prefix is not standard, add its lib subdirectory to rpath manually,
+        # in relative form, if supported. Do that only if we're linking to any
+        # non-imported shared libraries.
+        get_target_property(irulp ${TARGET_NAME} INSTALL_RPATH_USE_LINK_PATH)
+        list(FIND CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" syslib)
+        if(project_type MATCHES "EXECUTABLE|(MODULE|SHARED)_LIBRARY" AND
+                NOT CMAKE_SKIP_RPATH AND NOT CMAKE_SKIP_INSTALL_RPATH AND irulp AND syslib LESS 0)
+            get_target_property(link_libraries ${TARGET_NAME} LINK_LIBRARIES)
+            foreach(ll IN LISTS link_libraries)
+                if(TARGET "${ll}")
+                    get_target_property(ll_imported "${ll}" IMPORTED)
+                    get_target_property(ll_type "${ll}" TYPE)
+                    if(NOT ll_imported AND ll_type MATCHES "(MODULE|SHARED)_LIBRARY")
+                        set(needs_rpath ON)
+                        break()
+                    endif()
+                endif()
+            endforeach()
+            if(needs_rpath)
+                if(CMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN)
+                    file(RELATIVE_PATH rpath
+                        "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}"
+                        "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+                    set(rpath "${CMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN}/${rpath}")
+                else()
+                    set(rpath "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+                endif()
+                set_property(TARGET ${TARGET_NAME} APPEND PROPERTY INSTALL_RPATH "${rpath}")
+            endif()
+        endif()
     endif()
 
     if(args_TRANSLATIONS)
